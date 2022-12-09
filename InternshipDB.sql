@@ -183,6 +183,16 @@ CREATE TABLE Statuses(
 INSERT INTO Interns (FirstName, LastName, Pin, DateOfBirth, )
 
 
+--queries
+--1
+SELECT FirstName, LastName FROM Members
+	WHERE PlaceOfResidence NOT LIKE 'Split'
+--2
+SELECT BeginDate, EndDate FROM Internships
+	ORDER BY BeginDate DESC
+
+
+--
 
 	
 	
