@@ -31,7 +31,13 @@ CREATE TABLE Statuses(
 	Name VARCHAR (30) CHECK(Name IN('pripravnik', 'izbacen', 'zavrsen Internship'))
 )
 
-
+CREATE TABLE Internships(
+	InternshipId SERIAL PRIMARY KEY,
+	BeginDate TIMESTAMP,
+	EndDate TIMESTAMP,
+	PhaseId INT REFERENCES Phases(PhaseId),
+	LeaderId INT REFERENCES Members(MemberId)
+)
 
 
 
