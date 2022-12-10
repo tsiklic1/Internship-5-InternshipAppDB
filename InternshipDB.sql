@@ -178,10 +178,27 @@ CREATE TABLE Statuses(
 	PRIMARY KEY (InternId, FieldId, InternshipId)
 )
 
+ALTER TABLE  Statuses
+	ALTER COLUMN Status TYPE VARCHAR (30)
 
+INSERT INTO Statuses (InternId, FieldId, InternshipId, Status) VALUES
+(7, 1, 4, 'pripravnik'),
+(7, 2, 4, 'pripravnik'),
+(8, 3, 3, 'izbacen'),
+(8, 3, 4, 'pripravnik'),
+(9, 4, 4, 'izbacen'),
+(10, 1, 3, 'zavrsen internship'),
+(11, 2, 4, 'pripravnik'),
+(11, 1, 4, 'izbacen'),
+(12, 4, 4, 'izbacen'),
+(13, 2, 3, 'zavrsen internship'),
+(13, 1, 4, 'pripravnik'),
+(14, 3, 3, 'izbacen')
 
-INSERT INTO Interns (FirstName, LastName, Pin, DateOfBirth, )
-
+INSERT INTO Statuses (InternId, FieldId, InternshipId, Status) VALUES
+(10, 4, 3, 'zavrsen internship')
+(8,1,3,'izbacen')
+--triba ovo napunit sa ovin kombinacijama i posli toga ostaje ove ocjene risit
 
 --queries
 --1
@@ -190,10 +207,28 @@ SELECT FirstName, LastName FROM Members
 --2
 SELECT BeginDate, EndDate FROM Internships
 	ORDER BY BeginDate DESC
-
-
---
-
+--3
+SELECT FirstName, LastName FROM Interns intern
+	WHERE (SELECT COUNT(*) FROM Statuses WHERE InternshipId = 3 AND intern.InternId = InternId) > 0
 	
-	
+--3 (drugi nacin koji je valjda bolji)
+SELECT FirstName, LastName FROM Interns intern
+	WHERE (SELECT COUNT(*) FROM Statuses st WHERE intern.InternId = InternId AND 
+		   (SELECT COUNT(*) FROM Internships WHERE 
+			st.InternshipId = InternshipId AND date_part('year', BeginDate) = 2021) > 0) > 0
+
+--4
+SELECT COUNT(*) AS NumberOfFemaleInterns FROM Interns intern
+	WHERE (SELECT COUNT (*) FROM Statuses WHERE InternshipId = 4 AND intern.InternId = InternId AND intern.Gender = 'F') > 0
+--4 drugi nacin (ovo je valjda bolje)
+SELECT COUNT (*) AS NumberOfFemaleInterns FROM Interns intern
+	WHERE (intern.Gender = 'F' AND 
+		   (SELECT COUNT (*) FROM Statuses st WHERE intern.InternId = InternId AND 
+		   (SELECT COUNT (*) FROM Internships WHERE st.InternshipId = InternshipId AND 
+			(CURRENT_TIMESTAMP BETWEEN BeginDate AND EndDate))>0) > 0)
+--5
+SELECT COUNT (*) AS NumberOfKickedOutMarketingInterns FROM Statuses
+	WHERE (Status = 'izbacen' AND FieldId = 4)
+--6
+
 	
