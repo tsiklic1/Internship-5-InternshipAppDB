@@ -61,7 +61,6 @@ INSERT INTO Members (FirstName, LastName, Pin, DateOfBirth, Gender, PlaceOfResid
 ('Tina', 'Barun', '12121212121', '2003-3-8', 'F', 'Split'),
 ('Marko', 'Peric', '34562739581', '2000-1-2', 'M', 'Trogir');
 
-
 SELECT * FROM Members;	
 
 --Phases
@@ -102,9 +101,9 @@ CREATE TABLE InternshipsLeader(
 	InternshipId INT REFERENCES Internships(InternshipId),
 	LeaderId INT REFERENCES Members(MemberId),
 	CONSTRAINT UniqueInternshipLeaderPair UNIQUE (InternshipId, LeaderId)
-)
+);
 ALTER TABLE InternshipsLeader
-	ADD CONSTRAINT UniqueInternship UNIQUE (InternshipId)
+	ADD CONSTRAINT UniqueInternship UNIQUE (InternshipId);
 
 INSERT INTO InternshipsLeader (InternshipId, LeaderId) VALUES
 (3,66),
@@ -135,9 +134,7 @@ INSERT INTO Statuses (InternId, FieldId, InternshipId, Status) VALUES
 (7,2,2, 'pripravnik'),
 (8, 3, 1, 'izbacen');
 
-
 SELECT * FROM Statuses;
-
 
 --MembersFields
 CREATE TABLE MembersFields(
@@ -147,6 +144,9 @@ CREATE TABLE MembersFields(
 	CONSTRAINT StatusCascadeDeleteMember FOREIGN KEY (MemberId)
 	REFERENCES Members(MemberId) ON DELETE CASCADE	
 );
+
+ALTER TABLE MembersFields
+	DROP CONSTRAINT StatusCascadeDeleteMember;
 
 INSERT INTO MembersFields (MemberId, FieldId) VALUES
 (66,1),
@@ -160,7 +160,29 @@ INSERT INTO MembersFields (MemberId, FieldId) VALUES
 (7,2),
 (8,1);
 
-SELECT * FROM MembersFields
+SELECT * FROM MembersFields;
+--MembersCountByFields
+CREATE TABLE MembersCountByFields(
+	InternshipId INT REFERENCES Internships(InternshipId),
+	FieldId INT REFERENCES Fields(FieldId),
+	PRIMARY KEY (InternshipId, FieldId),
+	NumberOfInterns INT CHECK(NumberOfInterns>=0 AND NumberOfInterns <= 20)
+);
+
+INSERT INTO MembersCountByFields (InternshipId, FieldId, NumberOfInterns) VALUES
+(1,1,15),
+(1,2,8),
+(1,3,7),
+(1,4,11),
+(2,1,19),
+(2,2,5),
+(2,3,7),
+(2,4,9),
+(3,1,17),
+(3,2,8),
+(3,3,12),
+(3,4,16);
+
 
 --Homeworks
 CREATE TABLE Homeworks(
@@ -173,7 +195,6 @@ CREATE TABLE Homeworks(
 	REFERENCES Members (MemberId) ON DELETE CASCADE,
 	CONSTRAINT StatusCascadeDeleteIntern FOREIGN KEY (InternId)
 	REFERENCES Interns (InternId) ON DELETE CASCADE
-	
 );
 
 ALTER TABLE Homeworks
@@ -189,7 +210,15 @@ INSERT INTO Homeworks (InternId, FieldId, MemberId, Grade) VALUES
 (3,3,4, 3);
 
 INSERT INTO Homeworks(InternId, FieldId, MemberId, Grade) VALUES
-
+(3,3,4,3),
+(4,4,5,2),
+(4,4,5,3),
+(4,4,5,1),
+(4,4,6,2),
+(5,4,5,5),
+(5,4,5,3),
+(7,2,8,2),
+(7,2,6,4);
 
 --queries
 --1
@@ -233,17 +262,10 @@ DELETE FROM MembersFields mem
 	WHERE (SELECT COUNT(*) FROM Members WHERE mem.MemberId = MemberId AND 
 		   (CURRENT_TIMESTAMP - DateOfBirth) >= INTERVAL '25 year') > 0;
 
-/*UPDATE Statuses st --ovo nije dobro
-	SET InternshipId = NULL
-	WHERE (SELECT COUNT (*) FROM Internships ints WHERE st.InternshipId = ints.InternshipId AND
-		  (SELECT COUNT(*) FROM Members WHERE ints.LeaderId = MemberId AND 
-		   (CURRENT_TIMESTAMP - DateOfBirth) >= INTERVAL '25 year') > 0) > 0;*/
-
 UPDATE InternshipsLeader ints
 	SET LeaderId = NULL
 	WHERE (SELECT COUNT(*) FROM Members WHERE ints.LeaderId = MemberId AND 
 		   (CURRENT_TIMESTAMP - DateOfBirth) >= INTERVAL '25 year') > 0;
-SELECT * FROM InternshipsLeader 
  
 DELETE FROM Members
 	WHERE (CURRENT_TIMESTAMP - DateOfBirth) >= INTERVAL '25 year'
